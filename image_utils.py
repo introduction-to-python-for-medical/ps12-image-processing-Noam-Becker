@@ -1,42 +1,22 @@
 from PIL import Image
 import numpy as np
-from scipy.signal import convolve2d
 
 def load_image(path):
-    """
-    Load an image from the given file path and convert it into a NumPy array.
-    """
-    image = Image.open(path)  # Open image
-    image = np.array(image)  # Convert to NumPy array
-    return image
+    image = Image.open(path).convert("L")  # המרה לגריסקייל
+    return np.array(image)
+from scipy.signal import convolve2d
 
 def edge_detection(image):
-    """
-    Perform edge detection on an image array using vertical and horizontal filters.
-    """
-    # Convert to grayscale by averaging RGB channels
-    if len(image.shape) == 3:
-        gray_image = np.mean(image, axis=2)
-    else:
-        gray_image = image  # If already grayscale, keep as is
-    
-    # Define vertical and horizontal edge detection filters
-    vertical_filter = np.array([[-1, 0, 1],
-                                [-2, 0, 2],
-                                [-1, 0, 1]])
-    
-    horizontal_filter = np.array([[-1, -2, -1],
-                                   [0,  0,  0],
-                                   [1,  2,  1]])
-    
-    # Apply convolution
-    edge_x = convolve2d(gray_image, vertical_filter, mode='same', boundary='fill', fillvalue=0)
-    edge_y = convolve2d(gray_image, horizontal_filter, mode='same', boundary='fill', fillvalue=0)
-    
-    # Compute magnitude of edges
-    edge_mag = np.sqrt(edge_x**2 + edge_y**2)
-    
-    # Normalize to range [0, 255]
-    edge_mag = (edge_mag / edge_mag.max()) * 255
-    
-    return edge_mag.astype(np.uint8)
+    # הגדרת מסנן Sobel אופקי ואנכי
+    sobel_x = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])  # מסנן אופקי
+    sobel_y = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])  # מסנן אנכי
+
+    # ביצוע קונבולוציה עם המסננים
+    grad_x = convolve2d(image, sobel_x, mode='same', boundary='symm')
+    grad_y = convolve2d(image, sobel_y, mode='same', boundary='symm')
+
+    # חישוב התוצאה הסופית (שורש סכום ריבועים)
+    edge_magnitude = np.sqrt(grad_x**2 + grad_y**2)
+
+    # חזרה על התמונה עם ערכים בין 0 ל-255
+    return np.uint8(np.clip(edge_magnitude, 0, 255))
