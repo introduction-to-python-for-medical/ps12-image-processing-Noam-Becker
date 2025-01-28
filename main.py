@@ -1,20 +1,16 @@
+from image_utils import image_load, detection_edge, denoise_image, binarize_image, save_and_show_image
 
-import matplotlib.pyplot as plt
-from image_utils import load_image, edge_detection
+# שלב 1: טעינת התמונה
+image = image_load("path_to_your_image.jpg")
 
-# טעינת התמונה המקורית
-image = load_image("path_to_your_image.jpg")
+# שלב 2: הסרת רעשים
+clean_image = denoise_image(image)
 
-# ביצוע זיהוי קצוות
-edges = edge_detection(image)
+# שלב 3: זיהוי קצוות
+edge_mag = detection_edge(clean_image)
 
-# הצגת התמונה המקורית והתמונה עם הקצוות
-plt.subplot(1, 2, 1)
-plt.title("Original Image")
-plt.imshow(image, cmap='gray')
+# שלב 4: הפיכת התמונה לבינארית
+binary_image = binarize_image(edge_mag, threshold=100)
 
-plt.subplot(1, 2, 2)
-plt.title("Edge Detected Image")
-plt.imshow(edges, cmap='gray')
-
-plt.show()
+# שלב 5: שמירה והצגה
+save_and_show_image(binary_image, "edge_detected_image.png")
