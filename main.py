@@ -1,16 +1,33 @@
-from image_utils import image_load, detection_edge, denoise_image, binarize_image, save_and_show_image
+from PIL import Image
+import numpy as np
+from scipy.ndimage import convolve
+from image_utils import load_image, edge_detection
+from skimage.filters import median
+from skimage.morphology import ball
+import matplotlib.pyplot as plt
 
-# שלב 1: טעינת התמונה
-image = image_load("path_to_your_image.jpg")
+def suppress_noise(image_array):
+    clean_image = median(image_array, ball(3))
+    return clean_image
 
-# שלב 2: הסרת רעשים
-clean_image = denoise_image(image)
+def detect_edges(clean_image):
+    edges = edge_detection(clean_image)
+    return edges
 
-# שלב 3: זיהוי קצוות
-edge_mag = detection_edge(clean_image)
+def convert_to_binary(edges, threshold):
+    binary_image = (edges > threshold).astype(np.uint8)
+    return binary_image
 
-# שלב 4: הפיכת התמונה לבינארית
-binary_image = binarize_image(edge_mag, threshold=100)
+def save_binary_image(binary_image, file_name):
+    edge_image = Image.fromarray(binary_image * 255)
+    edge_image.save(file_name)
 
-# שלב 5: שמירה והצגה
-save_and_show_image(binary_image, "edge_detected_image.png")
+image_array = load_image('yuvalsh.jpg')
+clean_image = suppress_noise(image_array)
+edges = detect_edges(clean_image)
+binary_edges = convert_to_binary(edges, threshold=50)
+save_binary_image(binary_edges, 'my_edges.png')
+
+plt.imshow(binary_edges, cmap='gray')
+plt.title("Binary edges")
+plt.show()
