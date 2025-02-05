@@ -22,7 +22,7 @@ def save_binary_image(binary_image, file_name):
     edge_image = Image.fromarray(binary_image * 255)
     edge_image.save(file_name)
 
-image_array = load_image('yuvalsh.jpg')
+image_array = load_image('noam.jpg')
 clean_image = suppress_noise(image_array)
 edges = detect_edges(clean_image)
 binary_edges = convert_to_binary(edges, threshold=50)
